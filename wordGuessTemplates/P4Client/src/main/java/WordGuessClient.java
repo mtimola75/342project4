@@ -31,14 +31,15 @@ public class WordGuessClient extends Application {
 	VBox portIPBox;
 	BorderPane portPane;
 	HashMap<String, Scene> sceneMap;
-	EventHandler<ActionEvent> cat2;
+	EventHandler<ActionEvent> cat1Event, cat2Event, cat3Event;
+	PauseTransition pause = new PauseTransition(Duration.seconds(3));
 
 	// Category selection scene elements
 	Image _category1, _category2, _category3;
 	ImageView category1, category2, category3;
 	Text categoryInstructions, category1Label, category2Label, category3Label;
 	HBox categorySelect;
-	Button cat1;
+	Button cat1, cat2, cat3;
 
 	// Client scene elements
 	Text categoryChoiceLabel, categoryChoice, playerGuessLabel;
@@ -110,38 +111,38 @@ public class WordGuessClient extends Application {
 		portPane.setCenter(portIPBox);
 		portPane.setRight(connectButton);
 
-		cat2 = new EventHandler<ActionEvent>() {
-			public void handle(ActionEvent event) {
-				categoryInstructions.setText("Did this work?");
-			}
-		};
-
+		Scene portScene = new Scene(portPane, 400, 170); // INITIAL SCENE; not put in sceneMap since it will start here
 		// :::end initial port window:::
 
-		Scene portScene = new Scene(portPane, 400, 170); // INITIAL SCENE; not put in sceneMap since it will start here
 		sceneMap = new HashMap<String, Scene>();
-		sceneMap.put("category", createCategoryGui()); // create category selection scene and put into sceneMap
-		categoryInstructions.setText("Did this work?");
 
 		// :::start category selection screen:::
-		System.out.println("Before");
-		// ATTEMPTING TO ADD CLICKING ACTION TO ONE CATEGORY RIGHT NOW; THIS DOES NOT
-		// WORK AT THE MOMENT
-		cat1.setOnAction(e -> {
-			categoryInstructions.setText("Did this work?");
-		}); // end setOnAction()
-		System.out.println("After");
+		sceneMap.put("category", createCategoryGui()); // create category selection scene and put into sceneMap
 
-		this.category2.setOnMouseClicked((MouseEvent event) -> {
-			primaryStage.setScene(portScene);
-		}); // end setOnAction()
+		cat1Event = new EventHandler<ActionEvent>() {
+			public void handle(ActionEvent event) {
+				/*ADD CODE TO PASS OVER CATEGORY1 DATA HERE*/
+				primaryStage.setScene(sceneMap.get("gameplay"));  //get from scene map
+			}
+		};  //end cat1Event
 
-		this.category3.setOnMouseClicked((MouseEvent event) -> {
-			primaryStage.setScene(portScene);
-		}); // end setOnAction()
-
+		cat2Event = new EventHandler<ActionEvent>() {
+			public void handle(ActionEvent event) {
+				/*ADD CODE TO PASS OVER CATEGORY2 DATA HERE*/
+				primaryStage.setScene(sceneMap.get("gameplay"));  //get from scene map
+			}
+		};  //end cat2Event
+		
+		cat3Event = new EventHandler<ActionEvent>() {
+			public void handle(ActionEvent event) {
+				/*ADD CODE TO PASS OVER CATEGORY3 DATA HERE*/
+				primaryStage.setScene(sceneMap.get("gameplay"));  //get from scene map
+			}
+		};  //end cat3Event
+		
 		// :::end category selection screen::
 
+		// :::start gameplay screen:::
 		sceneMap.put("gameplay", createClientGui()); // create gameplay scene and put into sceneMap
 
 		Scene test = createCategoryGui();
@@ -180,14 +181,22 @@ public class WordGuessClient extends Application {
 
 		cat1 = new Button("Category 1");
 		cat1.setGraphic(category1);
-		cat1.setOnAction(cat2);
+		cat1.setOnAction(cat1Event);  //goes to EventHandler for category1
+		
+		cat2 = new Button("Category 2");
+		cat2.setGraphic(category2);
+		cat2.setOnAction(cat2Event);  //goes to EventHandler for category2
+		
+		cat3 = new Button("Category 3");
+		cat3.setGraphic(category3);
+		cat3.setOnAction(cat3Event);  //goes to EventHandler for category3
 
-		categorySelect = new HBox(3, cat1, category2, category3); // put pictures into HBox to view
+		categorySelect = new HBox(3, cat1, cat2, cat3); // put pictures into HBox to view
 
 		categoryPane.setCenter(categorySelect);
 		categoryPane.setTop(categoryInstructions);
 
-		return new Scene(categoryPane, 675, 350);
+		return new Scene(categoryPane, 775, 350);
 	}
 
 	public Scene createClientGui() {
