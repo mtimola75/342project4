@@ -1,4 +1,8 @@
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 import javafx.animation.PauseTransition;
 import javafx.application.Application;
@@ -55,24 +59,30 @@ public class WordGuessClient extends Application {
 	HBox categoryBox, guessBox;
 	VBox categoryAndGuessBox;
 
+	// Guesses
+	TextField playerGuessTextField;
+	Button submitGuessButton = new Button();
+	Set<String> playerGuessesSet = new HashSet<String>(Arrays.asList(""));
+	String playerGuess;
+	WordGuessInfo gameInfo = new WordGuessInfo();
 	Client c;
-	
+
 	static final int categoryHeight = 300;
 	static final int categoryWidth = 200;
-	
+
 	// JOHN'S EDIT
 	TextField serverInfo;
-	
+
 	boolean portEnter = false;
 	boolean ipEnter = false;
 	TextField portNum = new TextField();
 	TextField ipAddress = new TextField();
 	PauseTransition failTran = new PauseTransition(Duration.seconds(2));
-	
+
 	boolean cat1Chosen = false;
 	boolean cat2Chosen = false;
 	boolean cat3Chosen = false;
-	
+
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		launch(args);
@@ -92,50 +102,55 @@ public class WordGuessClient extends Application {
 		this.ipInput = new TextField();
 		this.connectButton = new Button("Connect");
 		this.serverInfo = new TextField();
-		
+
 		this.portBox = new HBox(8, portLabel, portInput); // port box
 		this.ipBox = new HBox(8, ipLabel, ipInput); // ip box
-		this.portIPBox = new VBox(10, portDirections, ipLabel, ipAddress, portLabel, portNum, serverInfo); // holds both boxes
-		
-		// Define the ipAddress EventHandler to handle the event where the TextField is pressed with Enter, update respective fields and enable portNum
-		ipAddress.setOnKeyPressed(e-> 
-		{
-			if (e.getCode().equals(KeyCode.ENTER)) 
-			{	
+		this.portIPBox = new VBox(10, portDirections, ipLabel, ipAddress, portLabel, portNum, serverInfo); // holds both
+																											// boxes
+
+		// Define the ipAddress EventHandler to handle the event where the TextField is
+		// pressed with Enter, update respective fields and enable portNum
+		ipAddress.setOnKeyPressed(e -> {
+			if (e.getCode().equals(KeyCode.ENTER)) {
 				ipEnter = true; // Set ipEnter to a value of true
 				ipAddress.setDisable(true); // Set ipAddress TextField to be disabled using the setDisable(...) method
 				portNum.setDisable(false); // Enable portNum using setDisable(...)
 			}
 		}); // end ipAddress.setOnKeyPressed(...)
-		
-		// Define the EventHandler for failTran PauseTransition to set the serverInfo background color to white and clear the information after the pause is finished
-		failTran.setOnFinished(e->{
+
+		// Define the EventHandler for failTran PauseTransition to set the serverInfo
+		// background color to white and clear the information after the pause is
+		// finished
+		failTran.setOnFinished(e -> {
 			serverInfo.setStyle("-fx-background-color: white;");
 			serverInfo.clear();
 		}); // end failTran.setOnFinished(...)
-		
-		// Disable the portNum button by using the setDisable(...) method and passing true as a parameter
+
+		// Disable the portNum button by using the setDisable(...) method and passing
+		// true as a parameter
 		portNum.setDisable(true);
-		
-		// Define the EventHandler for the portNum TextField for when the Enter key is pressed, the EventHandler is important here as it instantiates the client connection
-		// to the server and within it, it handles the GUI updates that taken place in the client
+
+		// Define the EventHandler for the portNum TextField for when the Enter key is
+		// pressed, the EventHandler is important here as it instantiates the client
+		// connection
+		// to the server and within it, it handles the GUI updates that taken place in
+		// the client
 		//
-		portNum.setOnKeyPressed(e-> 
-		{
-			if (e.getCode().equals(KeyCode.ENTER)) 
-			{
+		portNum.setOnKeyPressed(e -> {
+			if (e.getCode().equals(KeyCode.ENTER)) {
 				portEnter = true;
-				
-				// Check if the ipEnter and portEnter booleans are both true, if so, enter the block of code to instantiate the Client and attempt to connect to server
-				if ((ipEnter == true) && (portEnter == true))
-				{
-					
-					// Declare the instance of Client, assigning it to c and passing the serializable consumer, ipAddress and portNum to the  parameterized constructor
-					c = new Client(client->Platform.runLater(()->
-					{
-						// If the gameStatus held in gameInfo is 1 and the callback string of the client is the corresponding message, the information provided is invalid, set fields and request input from user again
-						if (client.toString().contains("Error: Could not connect, invalid ip or port"))
-						{
+
+				// Check if the ipEnter and portEnter booleans are both true, if so, enter the
+				// block of code to instantiate the Client and attempt to connect to server
+				if ((ipEnter == true) && (portEnter == true)) {
+
+					// Declare the instance of Client, assigning it to c and passing the
+					// serializable consumer, ipAddress and portNum to the parameterized constructor
+					c = new Client(client -> Platform.runLater(() -> {
+						// If the gameStatus held in gameInfo is 1 and the callback string of the client
+						// is the corresponding message, the information provided is invalid, set fields
+						// and request input from user again
+						if (client.toString().contains("Error: Could not connect, invalid ip or port")) {
 							serverInfo.setText("Error: Could not connect, invalid ip or port");
 							serverInfo.setStyle("-fx-background-color: hotpink;");
 							failTran.play();
@@ -144,32 +159,37 @@ public class WordGuessClient extends Application {
 							ipAddress.setDisable(false);
 							ipEnter = false;
 							portEnter = false;
-						}
-						else // Else the client has successfully connected to the server, set the corresponding fields and now the client will listen for and send the gameInfo object to the server
+						} else // Else the client has successfully connected to the server, set the
+								// corresponding fields and now the client will listen for and send the gameInfo
+								// object to the server
 						{
-							
-							serverInfo.setStyle("-fx-background-color: lightgreen;"); // Set serverInfo to light green background using setStyle(...)
+
+							serverInfo.setStyle("-fx-background-color: lightgreen;"); // Set serverInfo to light green
+																						// background using
+																						// setStyle(...)
 							serverInfo.setText("Connection successful, continuing to category selection...");
-							// Disable portNum and ipAddress when connection is successful using setDisable(...) method
+							// Disable portNum and ipAddress when connection is successful using
+							// setDisable(...) method
 							portNum.setDisable(true);
 							ipAddress.setDisable(true);
-							
-							primaryStage.setScene(createCategoryGui()); // Set the primaryStage to the resulting scene of setUpClientMenu() using setScene(...)
+
+							primaryStage.setScene(createCategoryGui()); // Set the primaryStage to the resulting scene
+																		// of setUpClientMenu() using setScene(...)
 						}
 					}), Integer.parseInt(portNum.getText().toString()), ipAddress.getText().toString());
-				
+
 //					primaryStage.setScene(createMenuGui()); // Set the primaryStage to the resulting scene of setUpClientMenu() using setScene(...)
-					
+
 					// Set ipEnter and portEnter to a value of false
 					ipEnter = false;
 					portEnter = false;
-					
+
 					c.start(); // Start the client connection using the start() method
 				}
-				
+
 			} // end if(...)
 		}); // end portNum.setOnKeyPressed(....)
-		
+
 		// launch client
 		this.connectButton.setOnAction(e -> {
 
@@ -216,73 +236,82 @@ public class WordGuessClient extends Application {
 
 		cat1Event = new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent event) {
-				/*ADD CODE TO PASS OVER CATEGORY1 DATA HERE*/
+				/* ADD CODE TO PASS OVER CATEGORY1 DATA HERE */
 				c.gameInfo.message = "Food";
-				
+
 				cat1Chosen = true;
 				cat2Chosen = false;
 				cat3Chosen = false;
 				categoryChoice = new Text("Food");
-				
+
 				c.send(c.gameInfo);
-				
-				primaryStage.setScene(createClientGui());  //get from scene map
+
+				primaryStage.setScene(createClientGui()); // get from scene map
 			}
-		};  //end cat1Event
+		}; // end cat1Event
 
 		cat2Event = new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent event) {
-				/*ADD CODE TO PASS OVER CATEGORY2 DATA HERE*/
-				primaryStage.setScene(createClientGui());  //get from scene map
+				/* ADD CODE TO PASS OVER CATEGORY2 DATA HERE */
+				primaryStage.setScene(createClientGui()); // get from scene map
 			}
-		};  //end cat2Event
-		
+		}; // end cat2Event
+
 		cat3Event = new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent event) {
-				/*ADD CODE TO PASS OVER CATEGORY3 DATA HERE*/
-				primaryStage.setScene(createClientGui());  //get from scene map
+				/* ADD CODE TO PASS OVER CATEGORY3 DATA HERE */
+				primaryStage.setScene(createClientGui()); // get from scene map
 			}
-		};  //end cat3Event
-		
+		}; // end cat3Event
+
 		// :::end category selection screen::
+
+		// submitGuessButton action
 
 		// :::start gameplay screen:::
 //		sceneMap.put("gameplay", createClientGui()); // create gameplay scene and put into sceneMap
 
 		Scene test = createCategoryGui();
-		primaryStage.setScene(createMenuGui()); // change to "setScene(portScene)" to start from inputting IP address; if
-										// anything else, it is for testing purposes
+		primaryStage.setScene(createMenuGui()); // change to "setScene(portScene)" to start from inputting IP address;
+												// if
+		// anything else, it is for testing purposes
 		primaryStage.show();
 	} // end start()
 
-	
-	public Scene createMenuGui()
-	{
+	public Scene createMenuGui() {
 		// create scene for port and ip window
 		portPane = new BorderPane();
-		Image background = new Image("images/gameroom.png"); // Declare an object of type Image, titleBackground to hold the image based on the value of altLook
-		// Declare and instantiate a BackgroundSize object, size, to set up the respective fields of the background
+		Image background = new Image("images/gameroom.png"); // Declare an object of type Image, titleBackground to hold
+																// the image based on the value of altLook
+		// Declare and instantiate a BackgroundSize object, size, to set up the
+		// respective fields of the background
 		BackgroundSize size = new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, true);
-		// Using the BorderPane method, setBackground(...), set the background of pane to the titleBackground
-		portPane.setBackground(new Background(new BackgroundImage(background, BackgroundRepeat.REPEAT, BackgroundRepeat.REPEAT, BackgroundPosition.DEFAULT, size )));
-		
+		// Using the BorderPane method, setBackground(...), set the background of pane
+		// to the titleBackground
+		portPane.setBackground(new Background(new BackgroundImage(background, BackgroundRepeat.REPEAT,
+				BackgroundRepeat.REPEAT, BackgroundPosition.DEFAULT, size)));
+
 		portPane.setPadding(new Insets(30));
 		portPane.setCenter(portIPBox);
 //		portPane.setRight(connectButton);
-		
+
 		return new Scene(portPane, 600, 600);
 	}
-	
+
 	public Scene createCategoryGui() {
 		BorderPane categoryPane = new BorderPane();
 		categoryPane.setPadding(new Insets(30));
-		
-		Image background = new Image("images/gameroom.png"); // Declare an object of type Image, titleBackground to hold the image based on the value of altLook
-		// Declare and instantiate a BackgroundSize object, size, to set up the respective fields of the background
+
+		Image background = new Image("images/gameroom.png"); // Declare an object of type Image, titleBackground to hold
+																// the image based on the value of altLook
+		// Declare and instantiate a BackgroundSize object, size, to set up the
+		// respective fields of the background
 		BackgroundSize size = new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, true);
-		// Using the BorderPane method, setBackground(...), set the background of pane to the titleBackground
-		categoryPane.setBackground(new Background(new BackgroundImage(background, BackgroundRepeat.REPEAT, BackgroundRepeat.REPEAT, BackgroundPosition.DEFAULT, size )));
-		
+		// Using the BorderPane method, setBackground(...), set the background of pane
+		// to the titleBackground
+		categoryPane.setBackground(new Background(new BackgroundImage(background, BackgroundRepeat.REPEAT,
+				BackgroundRepeat.REPEAT, BackgroundPosition.DEFAULT, size)));
+
 		categoryInstructions = new Text("Choose a category you would like to play.");
 		categoryInstructions.setTextAlignment(TextAlignment.CENTER);
 		// init pics
@@ -309,59 +338,82 @@ public class WordGuessClient extends Application {
 
 		cat1 = new Button("Food");
 //		cat1.setGraphic(category1);
-		cat1.setOnAction(cat1Event);  //goes to EventHandler for category1
-		
+		cat1.setOnAction(cat1Event); // goes to EventHandler for category1
+
 		cat2 = new Button("Animals");
 //		cat2.setGraphic(category2);
-		cat2.setOnAction(cat2Event);  //goes to EventHandler for category2
-		
+		cat2.setOnAction(cat2Event); // goes to EventHandler for category2
+
 		cat3 = new Button("States");
 //		cat3.setGraphic(category3);
-		cat3.setOnAction(cat3Event);  //goes to EventHandler for category3
+		cat3.setOnAction(cat3Event); // goes to EventHandler for category3
 
 		categorySelect = new HBox(3, cat1, cat2, cat3); // put pictures into HBox to view
 
 		categoryPane.setCenter(categorySelect);
 		categoryPane.setTop(categoryInstructions);
 
-		return new Scene(categoryPane, 775, 350);
+		return new Scene(categoryPane, 600, 600);
 	}
 
 	public Scene createClientGui() {
 		BorderPane gameplayPane = new BorderPane();
-		
-		Image background = new Image("images/gameroom.png"); // Declare an object of type Image, titleBackground to hold the image based on the value of altLook
-		// Declare and instantiate a BackgroundSize object, size, to set up the respective fields of the background
+
+		Image background = new Image("images/gameroom.png"); // Declare an object of type Image, titleBackground to hold
+																// the image based on the value of altLook
+		// Declare and instantiate a BackgroundSize object, size, to set up the
+		// respective fields of the background
 		BackgroundSize size = new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, true);
-		// Using the BorderPane method, setBackground(...), set the background of pane to the titleBackground
-		gameplayPane.setBackground(new Background(new BackgroundImage(background, BackgroundRepeat.REPEAT, BackgroundRepeat.REPEAT, BackgroundPosition.DEFAULT, size )));
-		
+		// Using the BorderPane method, setBackground(...), set the background of pane
+		// to the titleBackground
+		gameplayPane.setBackground(new Background(new BackgroundImage(background, BackgroundRepeat.REPEAT,
+				BackgroundRepeat.REPEAT, BackgroundPosition.DEFAULT, size)));
+
 		categoryChoiceLabel = new Text("Your category: ");
-		
-		if (cat1Chosen)
-		{
+
+		if (cat1Chosen) {
 			categoryChoice = new Text("Food");
-		}
-		else if (cat2Chosen)
-		{
+			playerGuessTextField = new TextField("Enter your guess! A-Z");
+			submitGuessButton = new Button("Submit Guess");
+		} else if (cat2Chosen) {
 			categoryChoice = new Text("Animals");
-		}
-		else if (cat3Chosen)
-		{
+		} else if (cat3Chosen) {
 			categoryChoice = new Text("States");
-		}
-		else
-		{
+		} else {
 			categoryChoice = new Text("<<CATEGORY HERE>>");
 		}
-		
+
+//		String firstword = gameInfo.foodList.get(1);
+//		System.out.println(firstword);
+
+		submitGuessButton.setOnAction(e -> {
+
+			playerGuess = playerGuessTextField.getText();
+
+			if ((playerGuessesSet.contains(playerGuess))) {
+				playerGuessTextField.setText("You have already guessed '" + playerGuessTextField.getText() + "'");
+
+			} else {
+
+				playerGuess = playerGuessTextField.getText();
+				playerGuessesSet.add(playerGuess);
+				guesses.getItems().add(playerGuessTextField.getText());
+
+//				if (firstword.contains(playerGuess)) {
+//					guesses.getItems().add(playerGuessTextField.getText() + " is a correct letter!");
+//				}
+
+			}
+
+		});
+
 //		categoryChoice = new Text("<<CATEGORY HERE>>"); // can be updated based on the category chosen
 		playerGuessLabel = new Text("You guessed the letters: ");
 		guesses = new ListView<String>();
 
 		categoryBox = new HBox(3, categoryChoiceLabel, categoryChoice);
 		guessBox = new HBox(3, playerGuessLabel, guesses);
-		categoryAndGuessBox = new VBox(3, categoryBox, guessBox);
+		categoryAndGuessBox = new VBox(3, categoryBox, guessBox, playerGuessTextField, submitGuessButton);
 
 		gameplayPane.setLeft(categoryAndGuessBox);
 
