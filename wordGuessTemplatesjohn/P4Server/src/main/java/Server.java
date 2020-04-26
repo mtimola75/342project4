@@ -31,7 +31,7 @@ public class Server{
 	boolean startGame = false;
 	WordGuessInfo gameInfo = new WordGuessInfo();
 	int replacement = 1;
-	
+	String guessWord;
 	boolean clientOneOnServer = false;
 	boolean clientTwoOnServer = false;
 	
@@ -104,36 +104,82 @@ public class Server{
 			}
 		}//end of while
 	}
-		// evalPlayerGuess():
-		//
-		// The evalPlayerGuess() method evaluates the play and guess of each player and returns an integer result based on the evaluation.
-		// If both players guess correctly on the opposing play, no points are awarded. Else if both players guess incorrectly, no points are awarded.
-		// If one player guesses correctly and the other player does not, the point is awarded accordingly. (1: p1 wins, 2: p2 wins, 3: no one wins)
-		//
-//		public int evalPlayerGuess() 
-//		{
-//			// 1: player 1 wins
-//			// 2: player 2 wins
-//			// 3: No one wins
-////			if ((Integer.parseInt(gameInfo.p2Plays) == gameInfo.p1Guess ) && (Integer.parseInt(gameInfo.p1Plays) == gameInfo.p2Guess)) // If the player one and two guessed correctly, return 3 as a tie
-////			{
-////				return 3; // Return 3 as no one won round
-////			}
-////			else if ((Integer.parseInt(gameInfo.p2Plays) == gameInfo.p1Guess ) && (Integer.parseInt(gameInfo.p1Plays) != gameInfo.p2Guess)) // Else if player one guessed correctly and wins round
-////			{
-////				return 1; // Return 1 as player one won round
-////			}
-////			else if ((Integer.parseInt(gameInfo.p1Plays) == gameInfo.p2Guess ) && (Integer.parseInt(gameInfo.p2Plays) != gameInfo.p1Guess)) // Else if the player two guessed correctly and wins round
-////			{
-////				return 2; // Return 2 as player two won round
-////			}
-////			else // No one guessed correctly
-////			{
-////				return 3; // Return 3 as no one won round
-////			}
-////			
-//			
-//		} // end evalPlayerGuess()
+	
+//		 evalPlayerGuess():
+//		
+//		 The evalPlayerGuess() method evaluates the play and guess of each player and returns an integer result based on the evaluation.
+//		 If both players guess correctly on the opposing play, no points are awarded. Else if both players guess incorrectly, no points are awarded.
+//		 If one player guesses correctly and the other player does not, the point is awarded accordingly. (1: p1 wins, 2: p2 wins, 3: no one wins)
+//		
+		public int evalPlayerGuess() 
+		{
+			// 1: player correct
+			// 2: player incorrect
+			// 3: No one wins
+			boolean correctGuessTemp = false;
+			
+			while(true)
+			{
+				if (this.guessWord.contains(gameInfo.playerGuess))
+				{
+					System.out.println("GUESS INDEX: " + this.guessWord.indexOf(gameInfo.playerGuess));
+//					gameInfo.clientProgressGuess.charAt(this.guessWord.indexOf(gameInfo.playerGuess))
+					StringBuilder editString = new StringBuilder(gameInfo.clientProgressGuess);
+					StringBuilder editGuessString = new StringBuilder(this.guessWord);
+					
+					char[] playerGuessArr = gameInfo.playerGuess.toCharArray();
+					
+					editString.setCharAt(this.guessWord.indexOf(gameInfo.playerGuess), playerGuessArr[0]);
+					editGuessString.setCharAt(this.guessWord.indexOf(gameInfo.playerGuess), '#');
+					
+					gameInfo.clientProgressGuess = editString.toString();
+					this.guessWord = editGuessString.toString();
+					System.out.println("Edited string: " + gameInfo.clientProgressGuess);
+					correctGuessTemp = true;
+					for (int i = 0; i < editGuessString.length(); i++)
+					{
+						if (editGuessString.charAt(i) == '#')
+						{
+							gameInfo.allCorrect = true;
+						}
+						else
+						{
+							gameInfo.allCorrect = false;
+							break;
+						}
+					}
+				}
+				else
+				{
+//					gameInfo.guessCorrect = false;
+					break;
+				}
+			}
+			
+			if (gameInfo.foodList.size() == 0)
+			{
+				gameInfo.foodFail = true;
+			}
+			else if (gameInfo.animalList.size() == 0)
+			{
+				gameInfo.animalFail = true;
+			}
+			else if (gameInfo.stateList.size() == 0)
+			{
+				gameInfo.stateFail = true;
+			}
+			
+			if (correctGuessTemp == true)
+			{
+				return 1;
+			}
+			else
+			{
+				gameInfo.guessesLeft--;
+				return 2;
+			}
+			
+		} // end evalPlayerGuess()
 //	
 
 		class ClientThread extends Thread{
@@ -213,13 +259,17 @@ public class Server{
 				    	
 				    	if (gameInfo.gameStatus == 0)
 				    	{
-				    		gameInfo.foodList.add("Pizza");
-				    		gameInfo.foodList.add("Nachos");
-				    		gameInfo.foodList.add("Tacos");
+				    		gameInfo.foodList.add("PIZZA");
+				    		gameInfo.foodList.add("NACHOS");
+				    		gameInfo.foodList.add("TACOS");
 				    		
-				    		gameInfo.animalList.add("Pig");
-				    		gameInfo.animalList.add("Dolphin");
-				    		gameInfo.animalList.add("Jaguar");
+				    		gameInfo.animalList.add("PIG");
+				    		gameInfo.animalList.add("DOLPHIN");
+				    		gameInfo.animalList.add("JAGUAR");
+				    		
+				    		gameInfo.stateList.add("ILLINOIS");
+				    		gameInfo.stateList.add("TEXAS");
+				    		gameInfo.stateList.add("CALIFORNIA");
 				    		
 				    		gameInfo.gameStatus = 1;
 				    		callback.accept("Filling array list with items...");
@@ -231,15 +281,29 @@ public class Server{
 				    		if (gameInfo.message.contains("Food"))
 				    		{
 				    			callback.accept("Client" + this.count + "chose food as category\n" + "The word to guess is: " + gameInfo.foodList.get(0));
-				    			
+				    			guessWord = gameInfo.foodList.get(0);
 				    			for (int i = 1; i <= gameInfo.foodList.get(0).length(); i++)
 				    			{
-				    				gameInfo.clientProgressGuess += "_ ";
+				    				gameInfo.clientProgressGuess += "_";
 				    			}
 				    			gameInfo.foodList.remove(0);
 				    			gameInfo.gameStatus = 2;
 				    			this.updateClients(gameInfo);
 				    		}
+				    	}
+				    	
+				    	else if (gameInfo.gameStatus == 2)
+				    	{
+				    		callback.accept("Client " + this.count + "has sent " + gameInfo.playerGuess);
+				    		if (evalPlayerGuess() == 1)
+				    		{
+				    			gameInfo.guessCorrect = true;
+				    		}
+				    		else
+				    		{
+				    			gameInfo.guessCorrect = false;
+				    		}
+				    		this.updateClients(gameInfo);
 				    	}
 //				    	gameInfo.amountPlayers = clients.size(); // Update amountPlayers field
 //				    	

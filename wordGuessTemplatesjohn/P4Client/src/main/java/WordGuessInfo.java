@@ -16,10 +16,16 @@ public class WordGuessInfo implements Serializable{
 	int clientID = 1;
 	int guessesLeft = 6;
 	boolean guessCorrect = false;
+	boolean allCorrect = false;
+	boolean foodFail = false;
+	boolean animalFail = false;
+	boolean stateFail = false;
+	
 	String message;
 	
+	String playerGuess;
 	// Keeps track of current client string progress (Displays empty portions)
-	String clientProgressGuess;
+	String clientProgressGuess = "";
 	
 	ArrayList<String> foodList = new ArrayList<String>();
 	ArrayList<String> animalList = new ArrayList<String>();

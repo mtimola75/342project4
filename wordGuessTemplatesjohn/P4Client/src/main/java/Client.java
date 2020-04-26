@@ -85,6 +85,7 @@ public class Client extends Thread{
 				else if (gameInfo.gameStatus == 2)
 				{
 					System.out.println("Info received: " + gameInfo.clientProgressGuess);
+					callback.accept(gameInfo);
 				}
 //				// Check if the message of gameInfo contains the message "Reconnected" if so accept message
 //				if (gameInfo.message.contains("Reconnected"))
