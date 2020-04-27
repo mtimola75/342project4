@@ -156,18 +156,6 @@ public class Server{
 				}
 			}
 			
-			if (gameInfo.foodList.size() == 0)
-			{
-				gameInfo.foodFail = true;
-			}
-			else if (gameInfo.animalList.size() == 0)
-			{
-				gameInfo.animalFail = true;
-			}
-			else if (gameInfo.stateList.size() == 0)
-			{
-				gameInfo.stateFail = true;
-			}
 			
 			if (correctGuessTemp == true)
 			{
@@ -176,6 +164,18 @@ public class Server{
 			else
 			{
 				gameInfo.guessesLeft--;
+				if (gameInfo.foodList.size() == 0 && gameInfo.guessesLeft == 0)
+				{
+					gameInfo.foodFail = true;
+				}
+				else if (gameInfo.animalList.size() == 0 && gameInfo.guessesLeft == 0)
+				{
+					gameInfo.animalFail = true;
+				}
+				else if (gameInfo.stateList.size() == 0 && gameInfo.guessesLeft == 0)
+				{
+					gameInfo.stateFail = true;
+				}
 				return 2;
 			}
 			
@@ -206,7 +206,7 @@ public class Server{
 				for(int i = 0; i < clients.size(); i++) {
 					ClientThread t = clients.get(i);
 					try {
-					 t.out.writeObject(data);
+						t.out.writeObject(data);
 					}
 					catch(Exception e) {}
 				}
@@ -259,14 +259,17 @@ public class Server{
 				    	
 				    	if (gameInfo.gameStatus == 0)
 				    	{
+				    		gameInfo.foodList.clear();
 				    		gameInfo.foodList.add("PIZZA");
 				    		gameInfo.foodList.add("NACHOS");
 				    		gameInfo.foodList.add("TACOS");
 				    		
+				    		gameInfo.animalList.clear();
 				    		gameInfo.animalList.add("PIG");
 				    		gameInfo.animalList.add("DOLPHIN");
 				    		gameInfo.animalList.add("JAGUAR");
 				    		
+				    		gameInfo.stateList.clear();
 				    		gameInfo.stateList.add("ILLINOIS");
 				    		gameInfo.stateList.add("TEXAS");
 				    		gameInfo.stateList.add("CALIFORNIA");
@@ -528,4 +531,3 @@ public class Server{
 			
 		}//end of client thread
 }
-

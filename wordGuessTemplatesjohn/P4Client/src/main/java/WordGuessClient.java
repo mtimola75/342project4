@@ -89,6 +89,8 @@ public class WordGuessClient extends Application {
 	boolean cat2Correct = false;
 	boolean cat3Correct = false;
 
+	Button continueButton = new Button("Continue");
+	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		launch(args);
@@ -236,8 +238,9 @@ public class WordGuessClient extends Application {
 																													// EMPTY
 																													// )
 									{
-										System.out.println("QUIT");
-										Platform.exit(); // REPLACE WITH PAUSE TRANSITION
+										primaryStage.setScene(createContinueScreen());
+//										System.out.println("QUIT");
+//										Platform.exit(); // REPLACE WITH PAUSE TRANSITION
 									} else {
 										returnToCategories.play();
 									}
@@ -322,6 +325,29 @@ public class WordGuessClient extends Application {
 //		Scene portScene = new Scene(portPane, 400, 170); // INITIAL SCENE; not put in sceneMap since it will start here
 		// :::end initial port window:::
 
+		continueButton.setOnAction(e->{
+			continueButton.setDisable(true);
+			cat1Chosen = false;
+			cat2Chosen = false;
+			cat3Chosen = false;
+			
+			cat1Correct = false;
+			cat2Correct = false;
+			cat3Correct = false;
+			
+			cat1.setDisable(false);
+			cat2.setDisable(false);
+			cat3.setDisable(false);
+			
+			c.gameInfo = new WordGuessInfo();
+			
+			c.gameInfo.gameStatus = 0;
+			c.gameInfo.allCorrect = false;
+			c.gameInfo.message = "";
+			c.send(c.gameInfo);
+			returnToCategories.play();
+		});
+		
 		sceneMap = new HashMap<String, Scene>();
 
 		// :::start category selection screen:::
@@ -348,7 +374,7 @@ public class WordGuessClient extends Application {
 				/* ADD CODE TO PASS OVER CATEGORY2 DATA HERE */
 				c.gameInfo.message = "Animals";
 				c.gameInfo.gameStatus = 1;
-				cat1Chosen = true;
+				cat1Chosen = false;
 				cat2Chosen = true;
 				// added this disable because something was bugging out
 				// and cat3Chosen = true wasnt disabling the button
@@ -367,8 +393,8 @@ public class WordGuessClient extends Application {
 				/* ADD CODE TO PASS OVER CATEGORY3 DATA HERE */
 				c.gameInfo.message = "States";
 				c.gameInfo.gameStatus = 1;
-				cat1Chosen = true;
-				cat2Chosen = true;
+				cat1Chosen = false;
+				cat2Chosen = false;
 				cat3Chosen = true;
 				// added this disable because something was bugging out
 				// and cat3Chosen = true wasnt disabling the button
@@ -567,6 +593,27 @@ public class WordGuessClient extends Application {
 		gameplayPane.setLeft(categoryAndGuessBox);
 
 		return new Scene(gameplayPane, 600, 600);
+	}
+	
+	public Scene createContinueScreen()
+	{
+		BorderPane continuePane = new BorderPane();
+		Image background = new Image("images/gameroom.png"); // Declare an object of type Image, titleBackground to hold the image based on the value of altLook
+		
+		// Declare and instantiate a BackgroundSize object, size, to set up the
+		// respective fields of the background
+		BackgroundSize size = new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, true);
+		
+		// Using the BorderPane method, setBackground(...), set the background of pane
+		// to the titleBackground
+		continuePane.setBackground(new Background(new BackgroundImage(background, BackgroundRepeat.REPEAT,
+		BackgroundRepeat.REPEAT, BackgroundPosition.DEFAULT, size)));
+		
+		VBox decisionBox = new VBox(continueButton);
+		
+		continuePane.setCenter(decisionBox);
+		
+		return new Scene(continuePane, 600, 600);
 	}
 
 }
