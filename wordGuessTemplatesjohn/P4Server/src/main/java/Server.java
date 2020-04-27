@@ -280,7 +280,7 @@ public class Server{
 				    	{
 				    		if (gameInfo.message.contains("Food"))
 				    		{
-				    			callback.accept("Client" + this.count + "chose food as category\n" + "The word to guess is: " + gameInfo.foodList.get(0));
+				    			callback.accept("Client " + this.count + " chose food as category\n" + "The word to guess is: " + gameInfo.foodList.get(0));
 				    			guessWord = gameInfo.foodList.get(0);
 				    			for (int i = 1; i <= gameInfo.foodList.get(0).length(); i++)
 				    			{
@@ -290,6 +290,34 @@ public class Server{
 				    			gameInfo.gameStatus = 2;
 				    			this.updateClients(gameInfo);
 				    		}
+				    		
+				    		else if (gameInfo.message.contains("Animals"))
+				    		{
+				    			callback.accept("Client " + this.count + " chose animals as category\n" + "The word to guess is: " + gameInfo.animalList.get(0));
+				    			guessWord = gameInfo.animalList.get(0);
+				    			for (int i = 1; i <= gameInfo.animalList.get(0).length(); i++)
+				    			{
+				    				gameInfo.clientProgressGuess += "_";
+				    			}
+				    			gameInfo.animalList.remove(0);
+				    			gameInfo.gameStatus = 2;
+				    			this.updateClients(gameInfo);
+				    		}
+				    		
+				     		else if (gameInfo.message.contains("States"))
+				    		{
+				    			callback.accept("Client " + this.count + " chose states as category\n" + "The word to guess is: " + gameInfo.stateList.get(0));
+				    			guessWord = gameInfo.stateList.get(0);
+				    			for (int i = 1; i <= gameInfo.stateList.get(0).length(); i++)
+				    			{
+				    				gameInfo.clientProgressGuess += "_";
+				    			}
+				    			gameInfo.stateList.remove(0);
+				    			gameInfo.gameStatus = 2;
+				    			this.updateClients(gameInfo);
+				    		}
+				    		
+				    		
 				    	}
 				    	
 				    	else if (gameInfo.gameStatus == 2)

@@ -65,6 +65,7 @@ public class WordGuessClient extends Application {
 	Set<String> playerGuessesSet = new HashSet<String>(Arrays.asList(""));
 	String playerGuess;
 	WordGuessInfo gameInfo = new WordGuessInfo();
+	Text enterA_ZValue = new Text();
 	Client c;
 
 	static final int categoryHeight = 300;
@@ -74,19 +75,20 @@ public class WordGuessClient extends Application {
 	TextField serverInfo;
 
 	boolean portEnter = false;
+	boolean guessEnter = false;
 	boolean ipEnter = false;
 	TextField portNum = new TextField();
 	TextField ipAddress = new TextField();
 	PauseTransition failTran = new PauseTransition(Duration.seconds(2));
 	PauseTransition returnToCategories = new PauseTransition(Duration.seconds(1.5));
-	
+
 	boolean cat1Chosen = false;
 	boolean cat2Chosen = false;
 	boolean cat3Chosen = false;
 	boolean cat1Correct = false;
 	boolean cat2Correct = false;
 	boolean cat3Correct = false;
-	
+
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		launch(args);
@@ -131,18 +133,13 @@ public class WordGuessClient extends Application {
 			serverInfo.setStyle("-fx-background-color: white;");
 			serverInfo.clear();
 		}); // end failTran.setOnFinished(...)
-		
+
 		returnToCategories.setOnFinished(e -> {
-			if(cat1Chosen && c.gameInfo.allCorrect)
-			{
+			if (cat1Chosen && c.gameInfo.allCorrect) {
 				cat1.setDisable(true);
-			}
-			else if (cat2Chosen && c.gameInfo.allCorrect)
-			{
+			} else if (cat2Chosen && c.gameInfo.allCorrect) {
 				cat2.setDisable(true);
-			}
-			else if (cat3Chosen && c.gameInfo.allCorrect)
-			{
+			} else if (cat3Chosen && c.gameInfo.allCorrect) {
 				cat3.setDisable(true);
 			}
 			c.gameInfo.allCorrect = false;
@@ -151,9 +148,9 @@ public class WordGuessClient extends Application {
 			c.gameInfo.clientProgressGuess = "";
 			playerGuessesSet.clear();
 			guesses = new ListView<String>();
-			
+
 			primaryStage.setScene(createCategoryGui());
-			
+
 		});
 		// Disable the portNum button by using the setDisable(...) method and passing
 		// true as a parameter
@@ -201,43 +198,47 @@ public class WordGuessClient extends Application {
 							// setDisable(...) method
 							portNum.setDisable(true);
 							ipAddress.setDisable(true);
-							if (c.gameInfo.gameStatus == 2)
-							{
+							if (c.gameInfo.gameStatus == 2) {
 //								guesses.getItems().add(client.toString());
-								if (c.gameInfo.allCorrect)
-								{
-									if (cat1Chosen)
-									{
+								if (c.gameInfo.allCorrect) {
+									if (cat1Chosen) {
 										cat1Correct = true;
-									}
-									else if (cat2Chosen)
-									{
+									} else if (cat2Chosen) {
 										cat2Correct = true;
-									}
-									else if (cat3Chosen)
-									{
+									} else if (cat3Chosen) {
 										cat3Correct = true;
 									}
-									guesses.getItems().add("You have correctly guessed the word: " + c.gameInfo.clientProgressGuess + "!");
+									guesses.getItems().add("You have correctly guessed the word: "
+											+ c.gameInfo.clientProgressGuess + "!");
+								} else if (c.gameInfo.guessCorrect) {
+									guesses.getItems().add("Correct guess, keep going! Updated String: "
+											+ c.gameInfo.clientProgressGuess);
+								} else if (!c.gameInfo.guessCorrect) {
+									guesses.getItems().add("Incorrect guess, try again! Updated String: "
+											+ c.gameInfo.clientProgressGuess);
 								}
-								else if (c.gameInfo.guessCorrect)
-								{
-									guesses.getItems().add("Correct guess, keep going! Updated String: " + c.gameInfo.clientProgressGuess);
-								}
-								else if (!c.gameInfo.guessCorrect)
-								{
-									guesses.getItems().add("Incorrect guess, try again! Updated String: " + c.gameInfo.clientProgressGuess);
-								}
-								
-								if ((c.gameInfo.guessesLeft == 0) || (c.gameInfo.allCorrect == true))
-								{
-									if ((cat1Correct && cat2Correct && cat3Correct) || (c.gameInfo.foodFail == true) || (c.gameInfo.animalFail == true) || (c.gameInfo.stateFail == true)) // ALSO CHECK IF THE PLAYER HAS FAILED ALL 3 ( ARRAY LIST IS EMPTY )
+
+								if ((c.gameInfo.guessesLeft == 0) || (c.gameInfo.allCorrect == true)) {
+									if ((cat1Correct && cat2Correct && cat3Correct) || (c.gameInfo.foodFail == true)
+											|| (c.gameInfo.animalFail == true) || (c.gameInfo.stateFail == true)) // ALSO
+																													// CHECK
+																													// IF
+																													// THE
+																													// PLAYER
+																													// HAS
+																													// FAILED
+																													// ALL
+																													// 3
+																													// (
+																													// ARRAY
+																													// LIST
+																													// IS
+																													// EMPTY
+																													// )
 									{
 										System.out.println("QUIT");
 										Platform.exit(); // REPLACE WITH PAUSE TRANSITION
-									}
-									else
-									{
+									} else {
 										returnToCategories.play();
 									}
 								}
@@ -345,6 +346,18 @@ public class WordGuessClient extends Application {
 		cat2Event = new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent event) {
 				/* ADD CODE TO PASS OVER CATEGORY2 DATA HERE */
+				c.gameInfo.message = "Animals";
+				c.gameInfo.gameStatus = 1;
+				cat1Chosen = true;
+				cat2Chosen = true;
+				// added this disable because something was bugging out
+				// and cat3Chosen = true wasnt disabling the button
+				cat2.setDisable(true);
+				cat3Chosen = false;
+				categoryChoice = new Text("Animals");
+
+				c.send(c.gameInfo);
+
 				primaryStage.setScene(createClientGui()); // get from scene map
 			}
 		}; // end cat2Event
@@ -352,6 +365,17 @@ public class WordGuessClient extends Application {
 		cat3Event = new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent event) {
 				/* ADD CODE TO PASS OVER CATEGORY3 DATA HERE */
+				c.gameInfo.message = "States";
+				c.gameInfo.gameStatus = 1;
+				cat1Chosen = true;
+				cat2Chosen = true;
+				cat3Chosen = true;
+				// added this disable because something was bugging out
+				// and cat3Chosen = true wasnt disabling the button
+				cat3.setDisable(true);
+				categoryChoice = new Text("States");
+
+				c.send(c.gameInfo);
 				primaryStage.setScene(createClientGui()); // get from scene map
 			}
 		}; // end cat3Event
@@ -465,7 +489,8 @@ public class WordGuessClient extends Application {
 
 		if (cat1Chosen) {
 			categoryChoice = new Text("Food");
-			playerGuessTextField = new TextField("Enter your guess! A-Z");
+			enterA_ZValue = new Text("Enter a character A-Z below!");
+			playerGuessTextField = new TextField("");
 			submitGuessButton = new Button("Submit Guess");
 		} else if (cat2Chosen) {
 			categoryChoice = new Text("Animals");
@@ -479,7 +504,6 @@ public class WordGuessClient extends Application {
 //		System.out.println(firstword);
 
 		submitGuessButton.setOnAction(e -> {
-
 			playerGuess = playerGuessTextField.getText();
 
 			if ((playerGuessesSet.contains(playerGuess))) {
@@ -490,16 +514,45 @@ public class WordGuessClient extends Application {
 				playerGuess = playerGuessTextField.getText();
 				playerGuessesSet.add(playerGuess);
 				guesses.getItems().add(playerGuessTextField.getText());
-				
+
 				c.gameInfo.playerGuess = playerGuessTextField.getText().toUpperCase();
-				
+
 				c.send(c.gameInfo);
 //				if (firstword.contains(playerGuess)) {
 //					guesses.getItems().add(playerGuessTextField.getText() + " is a correct letter!");
 //				}
 
 			}
+			playerGuessTextField.clear();
 
+		});
+
+		playerGuessTextField.setOnKeyPressed(e -> {
+			if (e.getCode().equals(KeyCode.ENTER)) {
+				guessEnter = true;
+
+				playerGuess = playerGuessTextField.getText();
+
+				if ((playerGuessesSet.contains(playerGuess))) {
+					playerGuessTextField.setText("You have already guessed " + playerGuessTextField.getText() + "'");
+
+				} else {
+
+					playerGuess = playerGuessTextField.getText();
+					playerGuessesSet.add(playerGuess);
+					guesses.getItems().add(playerGuessTextField.getText());
+
+					c.gameInfo.playerGuess = playerGuessTextField.getText().toUpperCase();
+
+					c.send(c.gameInfo);
+//				if (firstword.contains(playerGuess)) {
+//					guesses.getItems().add(playerGuessTextField.getText() + " is a correct letter!");
+//				}
+
+				}
+			}
+			playerGuessTextField.clear();
+			guessEnter = false;
 		});
 
 //		categoryChoice = new Text("<<CATEGORY HERE>>"); // can be updated based on the category chosen
@@ -508,7 +561,8 @@ public class WordGuessClient extends Application {
 
 		categoryBox = new HBox(3, categoryChoiceLabel, categoryChoice);
 		guessBox = new HBox(3, playerGuessLabel, guesses);
-		categoryAndGuessBox = new VBox(3, categoryBox, guessBox, playerGuessTextField, submitGuessButton);
+		categoryAndGuessBox = new VBox(3, categoryBox, guessBox, enterA_ZValue, playerGuessTextField,
+				submitGuessButton);
 
 		gameplayPane.setLeft(categoryAndGuessBox);
 
