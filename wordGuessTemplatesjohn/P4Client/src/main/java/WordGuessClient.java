@@ -26,6 +26,9 @@ import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
@@ -106,11 +109,26 @@ public class WordGuessClient extends Application {
 		cat3 = new Button("States");
 		// :::start initial port window:::
 		this.portDirections = new Text("Input port number & IP Address");
+		this.portDirections.setFont(Font.font(null, FontWeight.BOLD, 20));
+		this.portDirections.setFill(Color.AZURE);
+		this.portDirections.setStyle("-fx-stroke-width: 1; -fx-stroke: cornflowerblue;");
+		
 		this.portLabel = new Text("Port number: ");
+		this.portLabel.setFont(Font.font(null, FontWeight.BOLD, 20));
+		this.portLabel.setFill(Color.AZURE);
+		this.portLabel.setStyle("-fx-stroke-width: 1; -fx-stroke: cornflowerblue;");
+		
 		this.ipLabel = new Text("IP Address: ");
+		this.ipLabel.setFont(Font.font(null, FontWeight.BOLD, 20));
+		this.ipLabel.setFill(Color.AZURE);
+		this.ipLabel.setStyle("-fx-stroke-width: 1; -fx-stroke: cornflowerblue;");
+		
 		this.portInput = new TextField();
 		this.ipInput = new TextField();
 		this.connectButton = new Button("Connect");
+		this.connectButton.setFont(Font.font(null, FontWeight.BOLD, 20));
+		this.connectButton.setStyle("-fx-stroke-width: 1; -fx-stroke: cornflowerblue;");
+
 		this.serverInfo = new TextField();
 
 		this.portBox = new HBox(8, portLabel, portInput); // port box
@@ -455,6 +473,9 @@ public class WordGuessClient extends Application {
 				BackgroundRepeat.REPEAT, BackgroundPosition.DEFAULT, size)));
 
 		categoryInstructions = new Text("Choose a category you would like to play.");
+		categoryInstructions.setFont(Font.font(null, FontWeight.BOLD, 20));
+		categoryInstructions.setFill(Color.AZURE);
+		categoryInstructions.setStyle("-fx-stroke-width: 1; -fx-stroke: cornflowerblue;");
 		categoryInstructions.setTextAlignment(TextAlignment.CENTER);
 		// init pics
 //		_category1 = new Image("cat1.jpg");
@@ -512,10 +533,16 @@ public class WordGuessClient extends Application {
 				BackgroundRepeat.REPEAT, BackgroundPosition.DEFAULT, size)));
 
 		categoryChoiceLabel = new Text("Your category: ");
+		categoryChoiceLabel.setFont(Font.font(null, FontWeight.BOLD, 20));
+		categoryChoiceLabel.setFill(Color.AZURE);
+		categoryChoiceLabel.setStyle("-fx-stroke-width: 1; -fx-stroke: cornflowerblue;");
 
 		if (cat1Chosen) {
 			categoryChoice = new Text("Food");
 			enterA_ZValue = new Text("Enter a character A-Z below!");
+			enterA_ZValue.setFont(Font.font(null, FontWeight.BOLD, 20));
+			enterA_ZValue.setFill(Color.AZURE);
+			enterA_ZValue.setStyle("-fx-stroke-width: 1; -fx-stroke: cornflowerblue;");
 			playerGuessTextField = new TextField("");
 			submitGuessButton = new Button("Submit Guess");
 		} else if (cat2Chosen) {
@@ -583,6 +610,9 @@ public class WordGuessClient extends Application {
 
 //		categoryChoice = new Text("<<CATEGORY HERE>>"); // can be updated based on the category chosen
 		playerGuessLabel = new Text("You guessed the letters: ");
+		playerGuessLabel.setFont(Font.font(null, FontWeight.BOLD, 20));
+		playerGuessLabel.setFill(Color.AZURE);
+		playerGuessLabel.setStyle("-fx-stroke-width: 1; -fx-stroke: cornflowerblue;");
 		guesses = new ListView<String>();
 
 		categoryBox = new HBox(3, categoryChoiceLabel, categoryChoice);
