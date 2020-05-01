@@ -26,13 +26,13 @@ import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 
 public class WordGuessClient extends Application {
 
@@ -94,6 +94,21 @@ public class WordGuessClient extends Application {
 
 	Button continueButton = new Button("Continue");
 	
+	Image guessZero = new Image("images/hang0.png");
+	ImageView guessZeroView = new ImageView(guessZero);
+	Image guessOne = new Image("images/hang1.png");
+	ImageView guessOneView = new ImageView(guessOne);
+	Image guessTwo = new Image("images/hang2.png");
+	ImageView guessTwoView = new ImageView(guessTwo);
+	Image guessThree = new Image("images/hang3.png");
+	ImageView guessThreeView = new ImageView(guessThree);
+	Image guessFour = new Image("images/hang4.png");
+	ImageView guessFourView = new ImageView(guessFour);
+	Image guessFive = new Image("images/hang5.png");
+	ImageView guessFiveView = new ImageView(guessFive);
+	Image guessSix = new Image("images/hang6.png");
+	ImageView guessSixView = new ImageView(guessSix);
+	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		launch(args);
@@ -104,6 +119,10 @@ public class WordGuessClient extends Application {
 	public void start(Stage primaryStage) throws Exception {
 		// TODO Auto-generated method stub
 		primaryStage.setTitle("(Client) Word Guess!!!");
+		
+		guesses = new ListView<String>();
+		guesses.setMaxSize(400, 100);
+		
 		cat1 = new Button("Food");
 		cat2 = new Button("Animals");
 		cat3 = new Button("States");
@@ -112,23 +131,23 @@ public class WordGuessClient extends Application {
 		this.portDirections.setFont(Font.font(null, FontWeight.BOLD, 20));
 		this.portDirections.setFill(Color.AZURE);
 		this.portDirections.setStyle("-fx-stroke-width: 1; -fx-stroke: cornflowerblue;");
-		
+
 		this.portLabel = new Text("Port number: ");
 		this.portLabel.setFont(Font.font(null, FontWeight.BOLD, 20));
 		this.portLabel.setFill(Color.AZURE);
 		this.portLabel.setStyle("-fx-stroke-width: 1; -fx-stroke: cornflowerblue;");
-		
+
 		this.ipLabel = new Text("IP Address: ");
 		this.ipLabel.setFont(Font.font(null, FontWeight.BOLD, 20));
 		this.ipLabel.setFill(Color.AZURE);
 		this.ipLabel.setStyle("-fx-stroke-width: 1; -fx-stroke: cornflowerblue;");
-		
+
 		this.portInput = new TextField();
 		this.ipInput = new TextField();
 		this.connectButton = new Button("Connect");
 		this.connectButton.setFont(Font.font(null, FontWeight.BOLD, 20));
 		this.connectButton.setStyle("-fx-stroke-width: 1; -fx-stroke: cornflowerblue;");
-
+		
 		this.serverInfo = new TextField();
 
 		this.portBox = new HBox(8, portLabel, portInput); // port box
@@ -219,8 +238,9 @@ public class WordGuessClient extends Application {
 							portNum.setDisable(true);
 							ipAddress.setDisable(true);
 							if (c.gameInfo.gameStatus == 2) {
+								
 //								guesses.getItems().add(client.toString());
-								if (c.gameInfo.allCorrect) {
+								if (c.gameInfo.allCorrect && guessEnter) {
 									if (cat1Chosen) {
 										cat1Correct = true;
 									} else if (cat2Chosen) {
@@ -230,31 +250,22 @@ public class WordGuessClient extends Application {
 									}
 									guesses.getItems().add("You have correctly guessed the word: "
 											+ c.gameInfo.clientProgressGuess + "!");
-								} else if (c.gameInfo.guessCorrect) {
+									guessEnter = false;
+								} else if (c.gameInfo.guessCorrect && guessEnter) {
 									guesses.getItems().add("Correct guess, keep going! Updated String: "
 											+ c.gameInfo.clientProgressGuess);
-								} else if (!c.gameInfo.guessCorrect) {
+									guessEnter = false;
+								} else if (!c.gameInfo.guessCorrect && guessEnter) {
 									guesses.getItems().add("Incorrect guess, try again! Updated String: "
 											+ c.gameInfo.clientProgressGuess);
+									guessEnter = false;
 								}
-
+								
+								primaryStage.setScene(createClientGui());
+								
 								if ((c.gameInfo.guessesLeft == 0) || (c.gameInfo.allCorrect == true)) {
 									if ((cat1Correct && cat2Correct && cat3Correct) || (c.gameInfo.foodFail == true)
-											|| (c.gameInfo.animalFail == true) || (c.gameInfo.stateFail == true)) // ALSO
-																													// CHECK
-																													// IF
-																													// THE
-																													// PLAYER
-																													// HAS
-																													// FAILED
-																													// ALL
-																													// 3
-																													// (
-																													// ARRAY
-																													// LIST
-																													// IS
-																													// EMPTY
-																													// )
+											|| (c.gameInfo.animalFail == true) || (c.gameInfo.stateFail == true))
 									{
 										primaryStage.setScene(createContinueScreen());
 //										System.out.println("QUIT");
@@ -382,7 +393,6 @@ public class WordGuessClient extends Application {
 				categoryChoice = new Text("Food");
 
 				c.send(c.gameInfo);
-
 				primaryStage.setScene(createClientGui()); // get from scene map
 			}
 		}; // end cat1Event
@@ -401,7 +411,6 @@ public class WordGuessClient extends Application {
 				categoryChoice = new Text("Animals");
 
 				c.send(c.gameInfo);
-
 				primaryStage.setScene(createClientGui()); // get from scene map
 			}
 		}; // end cat2Event
@@ -424,14 +433,6 @@ public class WordGuessClient extends Application {
 			}
 		}; // end cat3Event
 
-		// :::end category selection screen::
-
-		// submitGuessButton action
-
-		// :::start gameplay screen:::
-//		sceneMap.put("gameplay", createClientGui()); // create gameplay scene and put into sceneMap
-
-		Scene test = createCategoryGui();
 		primaryStage.setScene(createMenuGui()); // change to "setScene(portScene)" to start from inputting IP address;
 												// if
 		// anything else, it is for testing purposes
@@ -476,6 +477,7 @@ public class WordGuessClient extends Application {
 		categoryInstructions.setFont(Font.font(null, FontWeight.BOLD, 20));
 		categoryInstructions.setFill(Color.AZURE);
 		categoryInstructions.setStyle("-fx-stroke-width: 1; -fx-stroke: cornflowerblue;");
+		
 		categoryInstructions.setTextAlignment(TextAlignment.CENTER);
 		// init pics
 //		_category1 = new Image("cat1.jpg");
@@ -502,7 +504,6 @@ public class WordGuessClient extends Application {
 //		cat1 = new Button("Food");
 //		cat1.setGraphic(category1);
 		cat1.setOnAction(cat1Event); // goes to EventHandler for category1
-
 //		cat2 = new Button("Animals");
 //		cat2.setGraphic(category2);
 		cat2.setOnAction(cat2Event); // goes to EventHandler for category2
@@ -522,8 +523,37 @@ public class WordGuessClient extends Application {
 	public Scene createClientGui() {
 		BorderPane gameplayPane = new BorderPane();
 
-		Image background = new Image("images/gameroom.png"); // Declare an object of type Image, titleBackground to hold
-																// the image based on the value of altLook
+		Image background = new Image("images/gameroom.png"); // Declare an object of type Image, titleBackground to hold the image based on the value of altLook
+		
+		ImageView hangmanView;
+		if (c.gameInfo.guessesLeft == 6)
+		{
+			hangmanView = new ImageView(guessZero);
+		}
+		else if (c.gameInfo.guessesLeft == 5)
+		{
+			hangmanView = new ImageView(guessOne);
+		}
+		else if (c.gameInfo.guessesLeft == 4)
+		{
+			hangmanView = new ImageView(guessTwo);
+		}
+		else if (c.gameInfo.guessesLeft == 3)
+		{
+			hangmanView = new ImageView(guessThree);
+		}
+		else if (c.gameInfo.guessesLeft == 2)
+		{
+			hangmanView = new ImageView(guessFour);
+		}
+		else if (c.gameInfo.guessesLeft == 1)
+		{
+			hangmanView = new ImageView(guessFive);
+		}
+		else
+		{
+			hangmanView = new ImageView(guessSix);
+		}
 		// Declare and instantiate a BackgroundSize object, size, to set up the
 		// respective fields of the background
 		BackgroundSize size = new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, true);
@@ -537,14 +567,15 @@ public class WordGuessClient extends Application {
 		categoryChoiceLabel.setFill(Color.AZURE);
 		categoryChoiceLabel.setStyle("-fx-stroke-width: 1; -fx-stroke: cornflowerblue;");
 
+		enterA_ZValue = new Text("Enter a character A-Z below!");
+		playerGuessTextField = new TextField("");
+		submitGuessButton = new Button("Submit Guess");
+		enterA_ZValue.setFont(Font.font(null, FontWeight.BOLD, 20));
+		enterA_ZValue.setFill(Color.AZURE);
+		enterA_ZValue.setStyle("-fx-stroke-width: 1; -fx-stroke: cornflowerblue;");
+		
 		if (cat1Chosen) {
 			categoryChoice = new Text("Food");
-			enterA_ZValue = new Text("Enter a character A-Z below!");
-			enterA_ZValue.setFont(Font.font(null, FontWeight.BOLD, 20));
-			enterA_ZValue.setFill(Color.AZURE);
-			enterA_ZValue.setStyle("-fx-stroke-width: 1; -fx-stroke: cornflowerblue;");
-			playerGuessTextField = new TextField("");
-			submitGuessButton = new Button("Submit Guess");
 		} else if (cat2Chosen) {
 			categoryChoice = new Text("Animals");
 		} else if (cat3Chosen) {
@@ -569,7 +600,6 @@ public class WordGuessClient extends Application {
 				guesses.getItems().add(playerGuessTextField.getText());
 
 				c.gameInfo.playerGuess = playerGuessTextField.getText().toUpperCase();
-
 				c.send(c.gameInfo);
 //				if (firstword.contains(playerGuess)) {
 //					guesses.getItems().add(playerGuessTextField.getText() + " is a correct letter!");
@@ -605,17 +635,18 @@ public class WordGuessClient extends Application {
 				}
 			}
 			playerGuessTextField.clear();
-			guessEnter = false;
+//			guessEnter = false;
 		});
-
+		hangmanView.setFitHeight(100);
+		hangmanView.setFitWidth(100);
 //		categoryChoice = new Text("<<CATEGORY HERE>>"); // can be updated based on the category chosen
 		playerGuessLabel = new Text("You guessed the letters: ");
+//		guesses = new ListView<String>();
 		playerGuessLabel.setFont(Font.font(null, FontWeight.BOLD, 20));
 		playerGuessLabel.setFill(Color.AZURE);
 		playerGuessLabel.setStyle("-fx-stroke-width: 1; -fx-stroke: cornflowerblue;");
-		guesses = new ListView<String>();
-
-		categoryBox = new HBox(3, categoryChoiceLabel, categoryChoice);
+		
+		categoryBox = new HBox(3, categoryChoiceLabel, categoryChoice, hangmanView);
 		guessBox = new HBox(3, playerGuessLabel, guesses);
 		categoryAndGuessBox = new VBox(3, categoryBox, guessBox, enterA_ZValue, playerGuessTextField,
 				submitGuessButton);
