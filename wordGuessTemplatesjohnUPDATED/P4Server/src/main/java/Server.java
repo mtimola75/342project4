@@ -24,13 +24,13 @@ public class Server{
 
 	int count = 1;	
 	ArrayList<ClientThread> clients = new ArrayList<ClientThread>();
-	
+	int clientCount = 0;
 	TheServer server;
 	private Consumer<Serializable> callback;
 	int portNum;
 	boolean startGame = false;
 	WordGuessInfo gameInfo = new WordGuessInfo();
-	int replacement = 1;
+//	int replacement = 1;
 	String guessWord;
 	boolean clientOneOnServer = false;
 	boolean clientTwoOnServer = false;
@@ -58,7 +58,7 @@ public class Server{
 	//
 	public int getClientCount()
 	{
-		return clients.size();
+		return this.clientCount;
 	} // end getClientCount
 	
 	public class TheServer extends Thread
@@ -69,32 +69,33 @@ public class Server{
 				callback.accept("Server Connection success, waiting on clients to join!");	
 			    while(true) {
 			    	// Check if clientOneOnServer is false, if so, update replacement
-			    	if (clientOneOnServer == false)
-					{
-						replacement = 1;
-					}
+//			    	if (clientOneOnServer == false)
+//					{
+//						replacement = 1;
+//					}
 			    	
 					ClientThread c = new ClientThread(mysocket.accept(), count);
+					clientCount++;
 					count++; // Increment count
 					clients.add(c); // Add c to arrayList
 					
-					// Check if clientOneOnServer is false, if so, set c name and update other fields
-					if (clientOneOnServer == false)
-					{
-						c.setName("clientOne");
-						clientOneOnServer = true;
-	//					gameInfo.reconnectNum = 1;
-						replacement = 1;
-					}
-					else if (clientTwoOnServer == false) // Else if clientTwoOnServer is false, set c name and update other fields
-					{
-						c.setName("clientTwo");
-						clientTwoOnServer = true;
-	//					gameInfo.reconnectNum = 2;
-						replacement = 2;
-					}
+//					// Check if clientOneOnServer is false, if so, set c name and update other fields
+//					if (clientOneOnServer == false)
+//					{
+//						c.setName("clientOne");
+//						clientOneOnServer = true;
+//	//					gameInfo.reconnectNum = 1;
+//						replacement = 1;
+//					}
+//					else if (clientTwoOnServer == false) // Else if clientTwoOnServer is false, set c name and update other fields
+//					{
+//						c.setName("clientTwo");
+//						clientTwoOnServer = true;
+//	//					gameInfo.reconnectNum = 2;
+//						replacement = 2;
+//					}
 					
-					callback.accept("client has connected to server: " + "client #" + replacement);
+					callback.accept("Client has connected to server: " + "client #" + count);
 					c.start();
 					
 			    }
@@ -404,7 +405,7 @@ public class Server{
 //				    	this.count--; // Decrement count
 //
 //				    	Server.this.clients.remove(this); // Remove the client out of the arrayList
-//				    	
+				    	Server.this.clientCount--;
 				    	break;
 				    }
 				}

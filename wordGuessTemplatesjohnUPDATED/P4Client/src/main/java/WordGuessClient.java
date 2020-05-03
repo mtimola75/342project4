@@ -39,7 +39,7 @@ public class WordGuessClient extends Application {
 	// IP & Port scene elements
 	Text portDirections, portLabel, ipLabel;
 	TextField portInput, ipInput;
-	Button connectButton;
+//	Button connectButton;
 	HBox portBox, ipBox;
 	VBox portIPBox;
 	BorderPane portPane;
@@ -83,8 +83,8 @@ public class WordGuessClient extends Application {
 	TextField portNum = new TextField();
 	TextField ipAddress = new TextField();
 	PauseTransition failTran = new PauseTransition(Duration.seconds(2));
-	PauseTransition returnToCategories = new PauseTransition(Duration.seconds(1.5));
-
+	PauseTransition returnToCategories = new PauseTransition(Duration.seconds(1.25));
+	PauseTransition goToContinue = new PauseTransition(Duration.seconds(2));
 	boolean cat1Chosen = false;
 	boolean cat2Chosen = false;
 	boolean cat3Chosen = false;
@@ -109,6 +109,7 @@ public class WordGuessClient extends Application {
 	Image guessSix = new Image("images/hang6.png");
 	ImageView guessSixView = new ImageView(guessSix);
 	
+	boolean clientConnect = false;
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		launch(args);
@@ -126,7 +127,7 @@ public class WordGuessClient extends Application {
 		cat1 = new Button("Food");
 		cat2 = new Button("Animals");
 		cat3 = new Button("States");
-		// :::start initial port window:::
+		
 		this.portDirections = new Text("Input port number & IP Address");
 		this.portDirections.setFont(Font.font(null, FontWeight.BOLD, 20));
 		this.portDirections.setFill(Color.AZURE);
@@ -144,12 +145,13 @@ public class WordGuessClient extends Application {
 
 		this.portInput = new TextField();
 		this.ipInput = new TextField();
-		this.connectButton = new Button("Connect");
-		this.connectButton.setFont(Font.font(null, FontWeight.BOLD, 20));
-		this.connectButton.setStyle("-fx-stroke-width: 1; -fx-stroke: cornflowerblue;");
+//		this.connectButton = new Button("Connect");
+//		this.connectButton.setFont(Font.font(null, FontWeight.BOLD, 20));
+//		this.connectButton.setStyle("-fx-stroke-width: 1; -fx-stroke: cornflowerblue;");
 		
 		this.serverInfo = new TextField();
-
+		serverInfo.setDisable(true);
+		serverInfo.setOpacity(100);
 		this.portBox = new HBox(8, portLabel, portInput); // port box
 		this.ipBox = new HBox(8, ipLabel, ipInput); // ip box
 		this.portIPBox = new VBox(10, portDirections, ipLabel, ipAddress, portLabel, portNum, serverInfo); // holds both
@@ -194,15 +196,18 @@ public class WordGuessClient extends Application {
 			primaryStage.setScene(createCategoryGui());
 
 		});
+		
+		goToContinue.setOnFinished(e->{
+			primaryStage.setScene(createContinueScreen());
+		});
+		
 		// Disable the portNum button by using the setDisable(...) method and passing
 		// true as a parameter
 		portNum.setDisable(true);
-
+		
 		// Define the EventHandler for the portNum TextField for when the Enter key is
 		// pressed, the EventHandler is important here as it instantiates the client
-		// connection
-		// to the server and within it, it handles the GUI updates that taken place in
-		// the client
+		// connection to the server and within it, it handles the GUI updates that taken place in the client
 		//
 		portNum.setOnKeyPressed(e -> {
 			if (e.getCode().equals(KeyCode.ENTER)) {
@@ -213,7 +218,7 @@ public class WordGuessClient extends Application {
 				if ((ipEnter == true) && (portEnter == true)) {
 
 					// Declare the instance of Client, assigning it to c and passing the
-					// serializable consumer, ipAddress and portNum to the parameterized constructor
+					// Serializable consumer, ipAddress and portNum to the parameterized constructor
 					c = new Client(client -> Platform.runLater(() -> {
 						// If the gameStatus held in gameInfo is 1 and the callback string of the client
 						// is the corresponding message, the information provided is invalid, set fields
@@ -231,7 +236,8 @@ public class WordGuessClient extends Application {
 								// corresponding fields and now the client will listen for and send the gameInfo
 								// object to the server
 						{
-
+							clientConnect = true;
+							primaryStage.setScene(createCategoryGui());
 							serverInfo.setStyle("-fx-background-color: lightgreen;"); // Set serverInfo to light green background using setStyle(...)
 							serverInfo.setText("Connection successful, continuing to category selection...");
 							// Disable portNum and ipAddress when connection is successful using
@@ -271,7 +277,7 @@ public class WordGuessClient extends Application {
 									if ((cat1Correct && cat2Correct && cat3Correct) || (c.gameInfo.foodFail == true)
 											|| (c.gameInfo.animalFail == true) || (c.gameInfo.stateFail == true))
 									{
-										primaryStage.setScene(createContinueScreen());
+										goToContinue.play();
 //										System.out.println("QUIT");
 //										Platform.exit(); // REPLACE WITH PAUSE TRANSITION
 									} else {
@@ -285,7 +291,11 @@ public class WordGuessClient extends Application {
 					}), Integer.parseInt(portNum.getText().toString()), ipAddress.getText().toString());
 
 //					primaryStage.setScene(createMenuGui()); // Set the primaryStage to the resulting scene of setUpClientMenu() using setScene(...)
-					primaryStage.setScene(createCategoryGui()); // Set the primaryStage to the resulting scene
+					if (clientConnect)
+					{
+						primaryStage.setScene(createCategoryGui()); // Set the primaryStage to the resulting scene
+					}
+//					primaryStage.setScene(createCategoryGui()); // Set the primaryStage to the resulting scene
 					// of setUpClientMenu() using setScene(...)
 					// Set ipEnter and portEnter to a value of false
 					ipEnter = false;
@@ -297,35 +307,35 @@ public class WordGuessClient extends Application {
 			} // end if(...)
 		}); // end portNum.setOnKeyPressed(....)
 
-		// launch client
-		this.connectButton.setOnAction(e -> {
-
-			String sPortNum = portInput.getText(); // get port num
-			String sIPNum = ipInput.getText(); // get ip num
-			System.out.println("Port input: " + sPortNum);
-			System.out.println("Port input: " + sIPNum);
-
-			if (!sPortNum.isEmpty() && !sIPNum.isEmpty()) // valid ip and port
-			{
-				primaryStage.setScene(sceneMap.get("client"));
-				primaryStage.setTitle("<<CLIENT>>");
-
-				int iPortNum = Integer.valueOf(sPortNum);
-
-				// ADD CODE TO CREATE NEW CLIENT HERE; OLD CODE COMMENTED OUT BC IDK HOW WE
-				// SHOULD IMPLEMENT CLIENT THREADS
-//				newClient = new Client(iPortNum, data -> {
-//					Platform.runLater(()->{
-//						listItems.getItems().add(data.toString());
-//					});  //end runLater
-//				});  //end newClient
-//				newClient.start();
-			} // end if
-			else {
-				this.portDirections.setText("<<ERROR>> Input valid port and IP.");
-			}
-
-		}); // end connectButton.setOnAction()
+//		// launch client
+//		this.connectButton.setOnAction(e -> {
+//
+//			String sPortNum = portInput.getText(); // get port num
+//			String sIPNum = ipInput.getText(); // get ip num
+//			System.out.println("Port input: " + sPortNum);
+//			System.out.println("Port input: " + sIPNum);
+//
+//			if (!sPortNum.isEmpty() && !sIPNum.isEmpty()) // valid ip and port
+//			{
+//				primaryStage.setScene(sceneMap.get("client"));
+//				primaryStage.setTitle("<<CLIENT>>");
+//
+//				int iPortNum = Integer.valueOf(sPortNum);
+//
+//				// ADD CODE TO CREATE NEW CLIENT HERE; OLD CODE COMMENTED OUT BC IDK HOW WE
+//				// SHOULD IMPLEMENT CLIENT THREADS
+////				newClient = new Client(iPortNum, data -> {
+////					Platform.runLater(()->{
+////						listItems.getItems().add(data.toString());
+////					});  //end runLater
+////				});  //end newClient
+////				newClient.start();
+//			} // end if
+//			else {
+//				this.portDirections.setText("<<ERROR>> Input valid port and IP.");
+//			}
+//
+//		}); // end connectButton.setOnAction()
 
 //		submitGuessButton.setOnAction(e -> {
 //
@@ -628,8 +638,8 @@ public class WordGuessClient extends Application {
 				playerGuess = playerGuessTextField.getText();
 
 				if ((playerGuessesSet.contains(playerGuess))) {
-					playerGuessTextField.setText("You have already guessed " + playerGuessTextField.getText() + "'");
-
+//					playerGuessTextField.setText("You have already guessed " + playerGuessTextField.getText() + "'");
+					guesses.getItems().add("You have already guessed: " + playerGuessTextField.getText());
 				} else {
 
 					playerGuess = playerGuessTextField.getText();

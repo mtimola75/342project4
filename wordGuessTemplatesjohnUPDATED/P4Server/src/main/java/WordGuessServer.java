@@ -171,8 +171,6 @@ public class WordGuessServer extends Application {
 						// Update errorMessage with a new message indicating a successful connection and change the color to light green
 						errorMessage.setText("Connection Success, waiting for clients!");
 						errorMessage.setStyle("-fx-background-color: lightgreen");
-						serverItems.add(data.toString());
-						listItems.setItems(serverItems);
 						serverLive = true; // Set serverLive to true
 						portNum.setDisable(true); // Disable portNum using setDisable(...)
 					}
